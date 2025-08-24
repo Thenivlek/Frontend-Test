@@ -35,12 +35,20 @@ const ListControl: React.FC = () => {
 
   return (
     <View style={styles.wrapper}>
-      <Pressable style={styles.select} onPress={() => setOpen(true)}>
+      <Pressable
+        testID="select-button"
+        style={styles.select}
+        onPress={() => setOpen(true)}
+      >
         <Text style={styles.selectText}>{activeList}</Text>
         <Text style={styles.caret}>▾</Text>
       </Pressable>
 
-      <Pressable style={styles.addBtn} onPress={() => addSymbolList()}>
+      <Pressable
+        testID="add-button"
+        style={styles.addBtn}
+        onPress={() => addSymbolList()}
+      >
         <Text style={styles.addIcon}>+</Text>
       </Pressable>
 
@@ -50,7 +58,11 @@ const ListControl: React.FC = () => {
         animationType="fade"
         onRequestClose={() => setOpen(false)}
       >
-        <Pressable style={styles.backdrop} onPress={() => setOpen(false)} />
+        <Pressable
+          testID="backdrop"
+          style={styles.backdrop}
+          onPress={() => setOpen(false)}
+        />
         <View style={styles.modal}>
           <FlatList
             data={names.sort()}
@@ -58,6 +70,7 @@ const ListControl: React.FC = () => {
             renderItem={({ item }) => (
               <View style={styles.optionRow}>
                 <Pressable
+                  testID={`option-${item}`}
                   style={styles.optionPress}
                   onPress={() => {
                     setActiveList(item);
@@ -68,6 +81,7 @@ const ListControl: React.FC = () => {
                 </Pressable>
 
                 <Pressable
+                  testID={`delete-${item}`}
                   style={styles.deletePill}
                   onPress={() => confirmDelete(item)}
                 >
