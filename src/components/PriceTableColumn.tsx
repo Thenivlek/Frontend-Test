@@ -10,43 +10,47 @@ export default function PriceTableColumn() {
   const [quotes, setQuotes] = useState<Record<string, Quote>>({});
 
   useEffect(() => {
-    setQuotes({}); // limpa ao trocar de lista
+    setQuotes({});
     if (!symbols.length) return;
 
-    const streams = symbols
-      .flatMap((s) => [
-        `${s.toLowerCase()}@ticker`,
-        `${s.toLowerCase()}@bookTicker`,
-      ])
-      .join("/");
+    const streams = symbols.map((s) => `${s.toLowerCase()}@ticker`).join("/");
 
     const ws = new WebSocket(
-      `wss://stream.binance.com:9443/stream?streams=${streams}`
+      `wss://data-stream.binance.com/stream?streams=${streams}`
     );
 
     ws.onmessage = (e) => {
-      const { stream, data } = JSON.parse(e.data);
-      const sym = stream.split("@")[0].toUpperCase();
-      setQuotes((prev) => {
-        const q = { ...(prev[sym] || {}) };
-        // 24hrTicker: c (last), P (percent)
-        if (data.c !== undefined) q.last = data.c;
-        if (data.P !== undefined) q.changePct = data.P;
-        // bookTicker: b (bid), a (ask)
-        if (data.b !== undefined) q.bid = data.b;
-        if (data.a !== undefined) q.ask = data.a;
-        return { ...prev, [sym]: q };
-      });
+      try {
+        const parsed = JSON.parse(e.data);
+        const { stream, data } = parsed;
+        if (!data) return;
+        const sym = stream.split("@")[0].toUpperCase();
+
+        setQuotes((prev) => {
+          const q = { ...(prev[sym] || {}) };
+          // ticker: c (last), P (percent), b (bid), a (ask)
+          if (data.c !== undefined) q.last = data.c;
+          if (data.P !== undefined) q.changePct = data.P;
+          if (data.b !== undefined) q.bid = data.b;
+          if (data.a !== undefined) q.ask = data.a;
+          return { ...prev, [sym]: q };
+        });
+      } catch (err) {
+        console.error(err);
+      }
     };
 
-    return () => ws.close();
+    ws.onerror = (err) => console.error("WebSocket error:", err);
+
+    return () => {
+      ws.close();
+    };
   }, [symbols.join(",")]);
 
   const rows = useMemo(
     () => symbols.map((s) => ({ s, ...quotes[s] })),
     [symbols, quotes]
   );
-
   const fmt = (v?: string, d = "-") => (v == null ? d : Number(v).toString());
 
   return (

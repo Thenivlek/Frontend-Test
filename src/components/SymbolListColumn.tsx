@@ -49,6 +49,15 @@ export default function SymbolListColumn() {
     Alert.alert("Success", "Symbols added to active list.");
   };
 
+  const handleSelectAll = () => {
+    const allSelected = filteredSymbols.every((s) => selected[s]);
+    const newSelected: Record<string, boolean> = {};
+    filteredSymbols.forEach((s) => {
+      newSelected[s] = !allSelected; // se todos selecionados, desmarca, senão marca
+    });
+    setSelected((prev) => ({ ...prev, ...newSelected }));
+  };
+
   return (
     <View style={{ flex: 1, padding: 10 }}>
       <TextInput
@@ -58,6 +67,23 @@ export default function SymbolListColumn() {
         onChangeText={setSearch}
         selectTextOnFocus
       />
+
+      <TouchableOpacity style={styles.headerRow}>
+        <View
+          style={[
+            styles.checkbox,
+            filteredSymbols.length > 0 &&
+              filteredSymbols.every((s) => selected[s]) &&
+              styles.checkboxOn,
+          ]}
+        >
+          {filteredSymbols.length > 0 &&
+          filteredSymbols.every((s) => selected[s]) ? (
+            <Text style={styles.check}>✓</Text>
+          ) : null}
+        </View>
+        <Text style={styles.headerText}>Symbol</Text>
+      </TouchableOpacity>
 
       <FlatList
         data={filteredSymbols}
@@ -94,6 +120,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: "#f9f9f9",
   },
+  selectAllBtn: {
+    marginBottom: 10,
+    height: 36,
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  selectAllBtnText: {
+    color: "#fff",
+    fontWeight: "500",
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -128,4 +165,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   addBtnText: { color: "#fff", fontWeight: "500" },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 12,
+
+    backgroundColor: "#f1f1f1", // cinza claro
+    borderRadius: 4,
+    marginBottom: 4,
+  },
+  headerText: {
+    fontWeight: "600",
+    color: "#333",
+  },
 });

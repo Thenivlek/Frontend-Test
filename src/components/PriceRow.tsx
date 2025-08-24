@@ -1,17 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
+interface PriceData {
+  c: string; // último preço
+  b: string; // melhor bid
+  a: string; // melhor ask
+  P: string; // variação %
+}
+
 const PriceRow = ({ symbol }: { symbol: string }) => {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<PriceData | null>(null);
 
   useEffect(() => {
-    const wsUrl = `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@ticker`;
+    const wsUrl = `wss://data-stream.binance.com/stream?streams=${symbol.toLowerCase()}@ticker`;
     const ws = new WebSocket(wsUrl);
 
     ws.onmessage = (event) => {
-      const parsed = JSON.parse(event.data);
+      try {
+        const parsed = JSON.parse(event.data);
 
-      setData(parsed);
+        if (parsed?.data) {
+          const ticker = parsed.data;
+          setData({
+            c: ticker.c,
+            b: ticker.b,
+            a: ticker.a,
+            P: ticker.P,
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
     };
 
     ws.onerror = (err) => {
@@ -26,12 +45,11 @@ const PriceRow = ({ symbol }: { symbol: string }) => {
   return (
     <View style={styles.priceRow}>
       <Text style={styles.cell}>{symbol}</Text>
-      <Text style={styles.cell}>{data?.c ? data?.c.toString() : "-"}</Text>
-      <Text style={styles.cell}>{data?.b ? data?.b.toString() : "-"}</Text>
-      <Text style={styles.cell}>{data?.a ? data?.a.toString() : "-"}</Text>
-
+      <Text style={styles.cell}>{data?.c ?? "-"}</Text>
+      <Text style={styles.cell}>{data?.b ?? "-"}</Text>
+      <Text style={styles.cell}>{data?.a ?? "-"}</Text>
       <Text style={[styles.cell, styles.change, styles.badge]}>
-        {data ? `${parseFloat(data.P).toFixed(2)}%` : "-"}
+        {data?.P ? `${parseFloat(data.P).toFixed(2)}%` : "-"}
       </Text>
     </View>
   );

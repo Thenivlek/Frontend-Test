@@ -35,10 +35,8 @@ function HomeScreen({ navigation }: HomeScreenProps) {
         </TouchableOpacity>
       </View>
 
-      {/* === Dropdown + botão teal === */}
       <ListControl />
 
-      {/* Tabela */}
       <View style={{ flex: 1 }}>
         <PriceTableColumn />
       </View>
