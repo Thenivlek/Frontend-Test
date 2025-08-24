@@ -24,11 +24,10 @@ const ListControl: React.FC = () => {
   const names = Object.keys(symbolLists);
 
   const confirmDelete = (name: string) => {
-    Alert.alert("Excluir lista", `Tem certeza que deseja excluir "${name}"?`, [
-      { text: "Cancelar", style: "cancel" },
+    Alert.alert("Delete list", `Are you sure you want to delete "${name}"?`, [
+      { text: "Cancel", style: "cancel" },
       {
-        text: "Excluir",
-        style: "destructive",
+        text: "Delete",
         onPress: () => removeSymbolList(name),
       },
     ]);
@@ -42,7 +41,7 @@ const ListControl: React.FC = () => {
       </Pressable>
 
       <Pressable style={styles.addBtn} onPress={() => addSymbolList()}>
-        <Text style={styles.addIcon}>＋</Text>
+        <Text style={styles.addIcon}>+</Text>
       </Pressable>
 
       <Modal

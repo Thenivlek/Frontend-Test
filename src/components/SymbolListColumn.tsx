@@ -6,22 +6,37 @@ import {
   Pressable,
   StyleSheet,
   TouchableOpacity,
+  TextInput,
   Alert,
 } from "react-native";
 import { useSymbolContext } from "../context/SymbolContext";
 
 export default function SymbolListColumn() {
   const [symbols, setSymbols] = useState<string[]>([]);
+  const [filteredSymbols, setFilteredSymbols] = useState<string[]>([]);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [search, setSearch] = useState("");
   const { addSymbolsToActiveList } = useSymbolContext();
 
   useEffect(() => {
     (async () => {
       const res = await fetch("https://api.binance.com/api/v3/exchangeInfo");
       const json = await res.json();
-      setSymbols(json.symbols.map((s: any) => s.symbol));
+      const allSymbols = json.symbols.map((s: any) => s.symbol);
+      setSymbols(allSymbols);
+      setFilteredSymbols(allSymbols);
     })();
   }, []);
+
+  useEffect(() => {
+    if (!search) {
+      setFilteredSymbols(symbols);
+    } else {
+      setFilteredSymbols(
+        symbols.filter((s) => s.toLowerCase().includes(search.toLowerCase()))
+      );
+    }
+  }, [search, symbols]);
 
   const toggle = (sym: string) =>
     setSelected((prev) => ({ ...prev, [sym]: !prev[sym] }));
@@ -36,8 +51,16 @@ export default function SymbolListColumn() {
 
   return (
     <View style={{ flex: 1, padding: 10 }}>
+      <TextInput
+        placeholder="Search"
+        style={styles.searchInput}
+        value={search}
+        onChangeText={setSearch}
+        selectTextOnFocus
+      />
+
       <FlatList
-        data={symbols}
+        data={filteredSymbols}
         keyExtractor={(i) => i}
         renderItem={({ item }) => (
           <Pressable
@@ -62,6 +85,15 @@ export default function SymbolListColumn() {
 }
 
 const styles = StyleSheet.create({
+  searchInput: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    backgroundColor: "#f9f9f9",
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",
